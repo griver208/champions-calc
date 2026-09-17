@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -75,7 +75,7 @@ input[type="number"]{width:55px;padding:4px;background:#ecf0f1;border:none;borde
 <body>
 <div class="fog-layer"></div>
 <header>
-<button id="lang-btn" onclick="toggleLang()">EN</button>
+<button id="lang-btn" onclick="toggleLang()">RU</button>
 <button id="help-btn" title="Help">?</button>
 <div id="help-box"><p id="help-text"></p></div>
 </header>
@@ -85,7 +85,7 @@ input[type="number"]{width:55px;padding:4px;background:#ecf0f1;border:none;borde
 <div id="save-modal" class="modal-overlay" onclick="if(event.target===this)closeSaveModal()"><div class="modal-content"><button class="modal-close" onclick="closeSaveModal()">&times;</button><div class="modal-title" data-i18n="saveHeroes"></div><div id="save-slots"></div></div></div>
 <div id="load-modal" class="modal-overlay" onclick="if(event.target===this)closeLoadModal()"><div class="modal-content"><button class="modal-close" onclick="closeLoadModal()">&times;</button><div class="modal-title" data-i18n="loadHeroes"></div><div id="load-slots"></div></div></div>
 <script>
-let currentLang='ru';
+let currentLang='en';
 const t={
 ru:{tabCalc:"Калькулятор шанса",tabBoss:"Боссы",tabAvg:"Средний урон",yourHeroes:"Ваши герои",enemies:"Враги",add:"+ Добавить",remove:"- Убрать",saveHeroes:"Сохранить героев",loadHeroes:"Загрузить героев",ally:"Герой",enemy:"Враг",atk:"Атака",def:"Броня",swapHero:"Поменять героя",selectSwap:"Выбрать замену",simulate:"ПРОВЕСТИ БОИ",calcAttempts:"Узнать среднее количество попыток",calcAvgDmg:"Посчитать средний урон",avgDmgTitle:"Средний урон за удар",winChance:"🏆 Шанс победы:",draw:"⚖️ Ничья:",avgDead:"💀 Среднее погибших героев:",avgHp:"❤️ Среднее оставшееся HP:",avgAttempts:"Среднее количество попыток:",avgDmgResult:"Средний урон за удар:",calc:"Считаем...",helpCalc:"Этот калькулятор показывает шансы на победу, основываясь на данных 10 000 проведенных боев.",helpBoss:"На текущей вкладке вы можете узнать какое в среднем количество боев вам нужно провести против сильных противников, прежде чем их победить.",helpAvg:"Эта вкладка показывает средний урон за один удар на основе 100 000 симуляций.",enterName:"Введите название сохранения:",overwrite:"Перезаписать сохранение",delete:"Удалить это сохранение?",empty:"Нет сохранений",slot:"Слот",save:"Сохранить",load:"Загрузить",del:"Удалить"},
 en:{tabCalc:"Win Chance",tabBoss:"Bosses",tabAvg:"Avg Damage",yourHeroes:"Your Heroes",enemies:"Enemies",add:"+ Add",remove:"- Remove",saveHeroes:"Save Heroes",loadHeroes:"Load Heroes",ally:"Hero",enemy:"Enemy",atk:"Attack",def:"Armor",swapHero:"Swap Hero",selectSwap:"Select Swap",simulate:"SIMULATE BATTLES",calcAttempts:"Calculate Avg Attempts",calcAvgDmg:"Calculate Avg Damage",avgDmgTitle:"Average Damage per Hit",winChance:"🏆 Win Chance:",draw:"⚖️ Draw:",avgDead:"💀 Avg Heroes Dead:",avgHp:"❤️ Avg Remaining HP:",avgAttempts:"Average Attempts:",avgDmgResult:"Average Damage per Hit:",calc:"Calculating...",helpCalc:"This calculator shows win chances based on 10,000 simulated battles.",helpBoss:"On this tab you can find out the average number of battles needed to defeat strong enemies.",helpAvg:"This tab shows the average damage per hit based on 100,000 simulations.",enterName:"Enter save name:",overwrite:"Overwrite save",delete:"Delete this save?",empty:"No saves",slot:"Slot",save:"Save",load:"Load",del:"Delete"}
