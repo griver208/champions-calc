@@ -1,896 +1,276 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Champions of Avan Battle Simulator</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 1000px; margin: 20px auto; padding: 20px; background-color: #1a252f; color: #ecf0f1; position: relative; overflow-x: hidden; }
-        .fog-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; }
-        .fog-layer::before, .fog-layer::after { content: ""; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%); animation: fogDrift 30s infinite linear; }
-        .fog-layer::after { background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 50%); animation: fogDrift 45s infinite reverse linear; }
-        @keyframes fogDrift { 0% { transform: translate(0, 0); } 100% { transform: translate(10%, 5%); } }
-        
-        header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
-            position: relative; 
-        }
-        .header-left { flex: 1; }
-        .header-right { display: flex; gap: 10px; align-items: center; }
-        
-        #lang-btn { 
-            width: 50px; 
-            height: 36px; 
-            border-radius: 5px; 
-            background: #2c3e50; 
-            color: #f1c40f; 
-            border: 1px solid #f1c40f; 
-            font-size: 14px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.2s; 
-        }
-        #lang-btn:hover { background: #34495e; }
-        
-        #help-btn { 
-            width: 36px; 
-            height: 36px; 
-            border-radius: 50%; 
-            background: #3498db; 
-            color: white; 
-            border: none; 
-            font-size: 20px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.2s; 
-            z-index: 1001; 
-        }
-        #help-btn:hover { background: #2980b9; transform: scale(1.1); }
-        
-        #help-box { 
-            display: none; 
-            position: absolute; 
-            top: 50px; 
-            right: 0; 
-            background: rgba(44, 62, 80, 0.95); 
-            padding: 15px 20px; 
-            border-radius: 8px; 
-            max-width: 350px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
-            border: 1px solid #3498db; 
-            z-index: 1000; 
-        }
-        #help-box p { font-size: 14px; line-height: 1.5; color: #ecf0f1; margin: 0; }
-        
-        .tab-content { display: none; } 
-        .tab-content.active { display: block; }
-        
-        .tab-layout { 
-            display: flex; 
-            gap: 15px; 
-            align-items: flex-start; 
-            margin-bottom: 20px; 
-            justify-content: center;
-        }
-        .save-column { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-            width: 180px; 
-            flex-shrink: 0; 
-        }
-        .save-btn, .load-btn { 
-            padding: 12px 10px; 
-            color: white; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 13px; 
-            transition: 0.2s; 
-            width: 100%; 
-        }
-        .save-btn { background: #9b59b6; } 
-        .save-btn:hover { background: #8e44ad; }
-        .load-btn { background: #16a085; } 
-        .load-btn:hover { background: #1abc9c; } 
-        .load-btn.hidden { display: none; }
-        
-        .team-wrapper { 
-            flex: 1; 
-            min-width: 0; 
-            max-width: 700px;
-        }
-        
-        .tabs { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 15px; 
-            justify-content: center;
-        }
-        .tab-btn { 
-            padding: 10px 20px; 
-            background: #34495e; 
-            color: #ecf0f1; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 14px; 
-            transition: 0.2s; 
-        }
-        .tab-btn:hover { background: #3d566e; } 
-        .tab-btn.active { background: #f39c12; color: #2c3e50; }
-        
-        .team { 
-            display: flex; 
-            gap: 20px; 
-            align-items: stretch; 
-        }
-        .column { 
-            flex: 1; 
-            background: #2c3e50; 
-            padding: 15px; 
-            border-radius: 8px; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        h2 { 
-            text-align: center; 
-            border-bottom: 2px solid #e74c3c; 
-            padding-bottom: 10px; 
-            margin-top: 0; 
-            font-size: 18px; 
-        }
-        
-        .controls { display: flex; gap: 10px; margin-bottom: 15px; }
-        .add-btn, .remove-btn { 
-            flex: 1; 
-            padding: 10px; 
-            color: white; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 16px; 
-            transition: 0.2s; 
-        }
-        .add-btn { background: #27ae60; } 
-        .add-btn:hover:not(:disabled) { background: #2ecc71; }
-        .remove-btn { background: #c0392b; font-size: 14px; } 
-        .remove-btn:hover:not(:disabled) { background: #e74c3c; }
-        .add-btn:disabled, .remove-btn:disabled { background: #7f8c8d; cursor: not-allowed; }
-        
-        .unit-container { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column-reverse; 
-            gap: 10px; 
-            overflow-y: auto; 
-            max-height: 60vh; 
-        }
-        .char-input { 
-            padding: 10px; 
-            background: #34495e; 
-            border-radius: 5px; 
-            border-left: 4px solid #3498db; 
-        }
-        .char-input.enemy-card { border-left-color: #e74c3c; }
-        
-        .unit-header { 
-            margin-bottom: 8px; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
-        .name-input { 
-            background: transparent; 
-            border: none; 
-            border-bottom: 1px dashed #7f8c8d; 
-            color: #f1c40f; 
-            font-size: 14px; 
-            font-weight: bold; 
-            flex: 1; 
-            padding: 2px 0; 
-            outline: none; 
-        }
-        .name-input:focus { border-bottom-color: #f1c40f; }
-        
-        .swap-btn { 
-            padding: 4px 10px; 
-            border: none; 
-            border-radius: 3px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 12px; 
-            transition: 0.2s; 
-            white-space: nowrap; 
-        }
-        .swap-btn.main { background: #f39c12; color: white; } 
-        .swap-btn.main:hover { background: #f1c40f; }
-        .swap-btn.target { background: #27ae60; color: white; } 
-        .swap-btn.target:hover { background: #2ecc71; }
-        
-        .swap-icon { 
-            width: 28px; 
-            height: 28px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: #f39c12; 
-            border-radius: 50%; 
-            cursor: default; 
-        }
-        
-        .stats-row { display: flex; margin-bottom: 5px; } 
-        .stats-row.top { justify-content: center; gap: 10px; } 
-        .stats-row.bottom { justify-content: center; }
-        .stat-item { display: flex; align-items: center; gap: 5px; }
-        .stat-item label { 
-            font-size: 15px; 
-            font-weight: bold; 
-            color: #bdc3c7; 
-            margin: 0; 
-            white-space: nowrap; 
-            display: flex; 
-            align-items: center; 
-        }
-        input[type="number"] { 
-            width: 55px; 
-            padding: 4px; 
-            background: #ecf0f1; 
-            border: none; 
-            border-radius: 3px; 
-            text-align: center; 
-            color: #2c3e50; 
-            font-weight: bold; 
-        }
-        
-        .calc-btn { 
-            width: 100%; 
-            padding: 15px; 
-            font-size: 20px; 
-            background: #f39c12; 
-            color: white; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            transition: 0.2s; 
-            margin-top: 15px; 
-            margin-bottom: 15px; 
-        }
-        .calc-btn:hover { background: #f1c40f; color: #2c3e50; }
-        
-        .result { 
-            font-size: 22px; 
-            text-align: center; 
-            font-weight: bold; 
-            color: #f1c40f; 
-            line-height: 1.5; 
-            min-height: 30px; 
-        }
-        
-        .modal-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.7); 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 2000; 
-        }
-        .modal-content { 
-            background: #2c3e50; 
-            padding: 25px; 
-            border-radius: 10px; 
-            max-width: 500px; 
-            width: 90%; 
-            position: relative; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
-            border: 1px solid #3498db; 
-            max-height: 80vh; 
-            overflow-y: auto; 
-        }
-        .modal-close { 
-            position: absolute; 
-            top: 10px; 
-            right: 15px; 
-            font-size: 28px; 
-            font-weight: bold; 
-            color: #95a5a6; 
-            cursor: pointer; 
-            background: none; 
-            border: none; 
-        }
-        .modal-close:hover { color: #e74c3c; }
-        
-        .modal-title { 
-            font-size: 20px; 
-            font-weight: bold; 
-            color: #f1c40f; 
-            margin-bottom: 20px; 
-            text-align: center; 
-        }
-        
-        .save-slot { 
-            background: #34495e; 
-            padding: 12px; 
-            margin-bottom: 10px; 
-            border-radius: 5px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .save-slot-name { 
-            font-size: 14px; 
-            color: #ecf0f1; 
-            flex: 1; 
-            word-break: break-all; 
-            margin-right: 10px; 
-        }
-        .slot-btn { 
-            padding: 6px 12px; 
-            border: none; 
-            border-radius: 3px; 
-            cursor: pointer; 
-            font-size: 12px; 
-            font-weight: bold; 
-            transition: 0.2s; 
-            margin-left: 5px; 
-        }
-        .slot-btn.save { background: #27ae60; color: white; } 
-        .slot-btn.save:hover { background: #2ecc71; }
-        .slot-btn.load { background: #3498db; color: white; } 
-        .slot-btn.load:hover { background: #2980b9; }
-        .slot-btn.delete { background: #c0392b; color: white; } 
-        .slot-btn.delete:hover { background: #e74c3c; }
-        
-        .avg-damage-container { 
-            max-width: 400px; 
-            margin: 0 auto; 
-            background: #2c3e50; 
-            padding: 30px; 
-            border-radius: 8px; 
-        }
-        .avg-damage-inputs { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            margin-bottom: 20px; 
-        }
-        .avg-damage-input-row { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            justify-content: center; 
-        }
-        .avg-damage-input-row label { 
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #bdc3c7; 
-            min-width: 100px; 
-        }
-        .avg-damage-input-row input { 
-            width: 100px; 
-            padding: 8px; 
-            font-size: 16px; 
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Champions of Avan Battle Simulator</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;max-width:1000px;margin:20px auto;padding:20px;background:#1a252f;color:#ecf0f1;position:relative;overflow-x:hidden}
+.fog-layer{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1;overflow:hidden}
+.fog-layer::before,.fog-layer::after{content:"";position:absolute;width:200%;height:200%;top:-50%;left:-50%;background:radial-gradient(circle,rgba(255,255,255,0.03) 0%,transparent 60%);animation:fogDrift 30s infinite linear}
+.fog-layer::after{background:radial-gradient(circle,rgba(255,255,255,0.04) 0%,transparent 50%);animation:fogDrift 45s infinite reverse linear}
+@keyframes fogDrift{0%{transform:translate(0,0)}100%{transform:translate(10%,5%)}}
+header{display:flex;justify-content:flex-end;align-items:center;margin-bottom:20px;position:relative;gap:10px}
+#lang-btn{width:50px;height:36px;border-radius:5px;background:#2c3e50;color:#f1c40f;border:1px solid #f1c40f;font-size:14px;font-weight:bold;cursor:pointer;transition:0.2s}
+#lang-btn:hover{background:#34495e}
+#help-btn{width:36px;height:36px;border-radius:50%;background:#3498db;color:white;border:none;font-size:20px;font-weight:bold;cursor:pointer;transition:0.2s;z-index:1001}
+#help-btn:hover{background:#2980b9;transform:scale(1.1)}
+#help-box{display:none;position:absolute;top:50px;right:0;background:rgba(44,62,80,0.95);padding:15px 20px;border-radius:8px;max-width:350px;box-shadow:0 5px 15px rgba(0,0,0,0.5);border:1px solid #3498db;z-index:1000}
+#help-box p{font-size:14px;line-height:1.5;color:#ecf0f1;margin:0}
+.tab-content{display:none}.tab-content.active{display:block}
+.tab-layout{display:flex;gap:15px;align-items:flex-start;margin-bottom:20px;justify-content:center}
+.save-column{display:flex;flex-direction:column;gap:10px;width:180px;flex-shrink:0}
+.save-btn,.load-btn{padding:12px 10px;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:13px;transition:0.2s;width:100%}
+.save-btn{background:#9b59b6}.save-btn:hover{background:#8e44ad}
+.load-btn{background:#16a085}.load-btn:hover{background:#1abc9c}
+.load-btn.hidden{display:none}
+.team-wrapper{flex:1;min-width:0;max-width:700px}
+.tabs{display:flex;gap:10px;margin-bottom:15px;justify-content:center}
+.tab-btn{padding:10px 20px;background:#34495e;color:#ecf0f1;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:14px;transition:0.2s}
+.tab-btn:hover{background:#3d566e}.tab-btn.active{background:#f39c12;color:#2c3e50}
+.team{display:flex;gap:20px;align-items:stretch}
+.column{flex:1;background:#2c3e50;padding:15px;border-radius:8px;display:flex;flex-direction:column}
+h2{text-align:center;border-bottom:2px solid #e74c3c;padding-bottom:10px;margin-top:0;font-size:18px}
+.controls{display:flex;gap:10px;margin-bottom:15px}
+.add-btn,.remove-btn{flex:1;padding:10px;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:16px;transition:0.2s}
+.add-btn{background:#27ae60}.add-btn:hover:not(:disabled){background:#2ecc71}
+.remove-btn{background:#c0392b;font-size:14px}.remove-btn:hover:not(:disabled){background:#e74c3c}
+.add-btn:disabled,.remove-btn:disabled{background:#7f8c8d;cursor:not-allowed}
+.unit-container{flex:1;display:flex;flex-direction:column-reverse;gap:10px;overflow-y:auto;max-height:60vh}
+.char-input{padding:10px;background:#34495e;border-radius:5px;border-left:4px solid #3498db}
+.char-input.enemy-card{border-left-color:#e74c3c}
+.unit-header{margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.name-input{background:transparent;border:none;border-bottom:1px dashed #7f8c8d;color:#f1c40f;font-size:14px;font-weight:bold;flex:1;padding:2px 0;outline:none}
+.name-input:focus{border-bottom-color:#f1c40f}
+.swap-btn{padding:4px 10px;border:none;border-radius:3px;cursor:pointer;font-weight:bold;font-size:12px;transition:0.2s;white-space:nowrap}
+.swap-btn.main{background:#f39c12;color:white}.swap-btn.main:hover{background:#f1c40f}
+.swap-btn.target{background:#27ae60;color:white}.swap-btn.target:hover{background:#2ecc71}
+.swap-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#f39c12;border-radius:50%;cursor:default}
+.stats-row{display:flex;margin-bottom:5px}.stats-row.top{justify-content:center;gap:10px}.stats-row.bottom{justify-content:center}
+.stat-item{display:flex;align-items:center;gap:5px}
+.stat-item label{font-size:15px;font-weight:bold;color:#bdc3c7;margin:0;white-space:nowrap;display:flex;align-items:center}
+input[type="number"]{width:55px;padding:4px;background:#ecf0f1;border:none;border-radius:3px;text-align:center;color:#2c3e50;font-weight:bold}
+.calc-btn{width:100%;padding:15px;font-size:20px;background:#f39c12;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;transition:0.2s;margin-top:15px;margin-bottom:15px}
+.calc-btn:hover{background:#f1c40f;color:#2c3e50}
+.result{font-size:22px;text-align:center;font-weight:bold;color:#f1c40f;line-height:1.5;min-height:30px}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:2000}
+.modal-content{background:#2c3e50;padding:25px;border-radius:10px;max-width:500px;width:90%;position:relative;box-shadow:0 5px 15px rgba(0,0,0,0.5);border:1px solid #3498db;max-height:80vh;overflow-y:auto}
+.modal-close{position:absolute;top:10px;right:15px;font-size:28px;font-weight:bold;color:#95a5a6;cursor:pointer;background:none;border:none}
+.modal-close:hover{color:#e74c3c}
+.modal-title{font-size:20px;font-weight:bold;color:#f1c40f;margin-bottom:20px;text-align:center}
+.save-slot{background:#34495e;padding:12px;margin-bottom:10px;border-radius:5px;display:flex;justify-content:space-between;align-items:center}
+.save-slot-name{font-size:14px;color:#ecf0f1;flex:1;word-break:break-all;margin-right:10px}
+.slot-btn{padding:6px 12px;border:none;border-radius:3px;cursor:pointer;font-size:12px;font-weight:bold;transition:0.2s;margin-left:5px}
+.slot-btn.save{background:#27ae60;color:white}.slot-btn.save:hover{background:#2ecc71}
+.slot-btn.load{background:#3498db;color:white}.slot-btn.load:hover{background:#2980b9}
+.slot-btn.delete{background:#c0392b;color:white}.slot-btn.delete:hover{background:#e74c3c}
+.avg-damage-container{max-width:400px;margin:0 auto;background:#2c3e50;padding:30px;border-radius:8px}
+.avg-damage-inputs{display:flex;flex-direction:column;gap:15px;margin-bottom:20px}
+.avg-damage-input-row{display:flex;align-items:center;gap:10px;justify-content:center}
+.avg-damage-input-row label{font-size:16px;font-weight:bold;color:#bdc3c7;min-width:100px}
+.avg-damage-input-row input{width:100px;padding:8px;font-size:16px}
+</style>
 </head>
 <body>
-    <div class="fog-layer"></div>
-    
-    <header>
-        <div class="header-left"></div>
-        <div class="header-right">
-            <button id="lang-btn" onclick="toggleLang()">EN</button>
-            <button id="help-btn" title="Help">?</button>
-            <div id="help-box">
-                <p id="help-text"></p>
-            </div>
-        </div>
-    </header>
-
-    <div id="tab-calc" class="tab-content active">
-        <div class="tab-layout">
-            <div class="save-column">
-                <button class="save-btn" data-i18n="saveHeroes" onclick="openSaveModal('calc')">Save Heroes</button>
-                <button class="load-btn hidden" id="load-btn-calc" data-i18n="loadHeroes" onclick="openLoadModal('calc')">Load Heroes</button>
-            </div>
-            <div class="team-wrapper">
-                <div class="tabs">
-                    <button class="tab-btn active" data-i18n="tabCalc" onclick="switchTab('calc')">Win Chance</button>
-                    <button class="tab-btn" data-i18n="tabBoss" onclick="switchTab('boss')">Bosses</button>
-                    <button class="tab-btn" data-i18n="tabAvg" onclick="switchTab('avg')">Avg Damage</button>
-                </div>
-                <div class="team">
-                    <div class="column">
-                        <h2 data-i18n="yourHeroes">Your Heroes</h2>
-                        <div class="controls">
-                            <button class="add-btn" id="add-ally-btn" data-i18n="add">+ Add</button>
-                            <button class="remove-btn" id="rem-ally-btn" data-i18n="remove">- Remove</button>
-                        </div>
-                        <div id="allies-container" class="unit-container"></div>
-                    </div>
-                    <div class="column">
-                        <h2 data-i18n="enemies">Enemies</h2>
-                        <div class="controls">
-                            <button class="add-btn" id="add-enemy-btn" data-i18n="add">+ Add</button>
-                            <button class="remove-btn" id="rem-enemy-btn" data-i18n="remove">- Remove</button>
-                        </div>
-                        <div id="enemies-container" class="unit-container"></div>
-                    </div>
-                </div>
-                <button class="calc-btn" data-i18n="simulate" onclick="calculateWinChance()">SIMULATE BATTLES</button>
-                <div id="result" class="result"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="tab-boss" class="tab-content">
-        <div class="tab-layout">
-            <div class="save-column">
-                <button class="save-btn" data-i18n="saveHeroes" onclick="openSaveModal('boss')">Save Heroes</button>
-                <button class="load-btn hidden" id="load-btn-boss" data-i18n="loadHeroes" onclick="openLoadModal('boss')">Load Heroes</button>
-            </div>
-            <div class="team-wrapper">
-                <div class="tabs">
-                    <button class="tab-btn" data-i18n="tabCalc" onclick="switchTab('calc')">Win Chance</button>
-                    <button class="tab-btn active" data-i18n="tabBoss" onclick="switchTab('boss')">Bosses</button>
-                    <button class="tab-btn" data-i18n="tabAvg" onclick="switchTab('avg')">Avg Damage</button>
-                </div>
-                <div class="team">
-                    <div class="column">
-                        <h2 data-i18n="yourHeroes">Your Heroes</h2>
-                        <div class="controls">
-                            <button class="add-btn" id="add-ally-btn-boss" data-i18n="add">+ Add</button>
-                            <button class="remove-btn" id="rem-ally-btn-boss" data-i18n="remove">- Remove</button>
-                        </div>
-                        <div id="allies-container-boss" class="unit-container"></div>
-                    </div>
-                    <div class="column">
-                        <h2 data-i18n="enemies">Enemies</h2>
-                        <div class="controls">
-                            <button class="add-btn" id="add-enemy-btn-boss" data-i18n="add">+ Add</button>
-                            <button class="remove-btn" id="rem-enemy-btn-boss" data-i18n="remove">- Remove</button>
-                        </div>
-                        <div id="enemies-container-boss" class="unit-container"></div>
-                    </div>
-                </div>
-                <button class="calc-btn" data-i18n="calcAttempts" onclick="calculateBossAttempts()">Calculate Avg Attempts</button>
-                <div id="result-boss" class="result"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="tab-avg" class="tab-content">
-        <div class="tab-layout">
-            <div class="team-wrapper">
-                <div class="tabs">
-                    <button class="tab-btn" data-i18n="tabCalc" onclick="switchTab('calc')">Win Chance</button>
-                    <button class="tab-btn" data-i18n="tabBoss" onclick="switchTab('boss')">Bosses</button>
-                    <button class="tab-btn active" data-i18n="tabAvg" onclick="switchTab('avg')">Avg Damage</button>
-                </div>
-                <div class="avg-damage-container">
-                    <h2 data-i18n="avgDmgTitle">Average Damage per Hit</h2>
-                    <div class="avg-damage-inputs">
-                        <div class="avg-damage-input-row">
-                            <label>⚔️ <span data-i18n="atk">Attack</span>:</label>
-                            <input type="number" id="avg-atk" value="20" min="1">
-                        </div>
-                        <div class="avg-damage-input-row">
-                            <label>🛡️ <span data-i18n="def">Armor</span>:</label>
-                            <input type="number" id="avg-def" value="10" min="1">
-                        </div>
-                    </div>
-                    <button class="calc-btn" data-i18n="calcAvgDmg" onclick="calculateAvgDamage()">Calculate Avg Damage</button>
-                    <div id="result-avg" class="result"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="save-modal" class="modal-overlay" onclick="if(event.target===this) closeSaveModal()">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeSaveModal()">&times;</button>
-            <div class="modal-title" data-i18n="saveHeroes">Save Heroes</div>
-            <div id="save-slots"></div>
-        </div>
-    </div>
-    
-    <div id="load-modal" class="modal-overlay" onclick="if(event.target===this) closeLoadModal()">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeLoadModal()">&times;</button>
-            <div class="modal-title" data-i18n="loadHeroes">Load Heroes</div>
-            <div id="load-slots"></div>
-        </div>
-    </div>
-
+<div class="fog-layer"></div>
+<header>
+<button id="lang-btn" onclick="toggleLang()">EN</button>
+<button id="help-btn" title="Help">?</button>
+<div id="help-box"><p id="help-text"></p></div>
+</header>
+<div id="tab-calc" class="tab-content active"><div class="tab-layout"><div class="save-column"><button class="save-btn" data-i18n="saveHeroes" onclick="openSaveModal('calc')"></button><button class="load-btn hidden" id="load-btn-calc" data-i18n="loadHeroes" onclick="openLoadModal('calc')"></button></div><div class="team-wrapper"><div class="tabs"><button class="tab-btn active" data-i18n="tabCalc" onclick="switchTab('calc')"></button><button class="tab-btn" data-i18n="tabBoss" onclick="switchTab('boss')"></button><button class="tab-btn" data-i18n="tabAvg" onclick="switchTab('avg')"></button></div><div class="team"><div class="column"><h2 data-i18n="yourHeroes"></h2><div class="controls"><button class="add-btn" id="add-ally-btn" data-i18n="add"></button><button class="remove-btn" id="rem-ally-btn" data-i18n="remove"></button></div><div id="allies-container" class="unit-container"></div></div><div class="column"><h2 data-i18n="enemies"></h2><div class="controls"><button class="add-btn" id="add-enemy-btn" data-i18n="add"></button><button class="remove-btn" id="rem-enemy-btn" data-i18n="remove"></button></div><div id="enemies-container" class="unit-container"></div></div></div><button class="calc-btn" data-i18n="simulate" onclick="calculateWinChance()"></button><div id="result" class="result"></div></div></div></div>
+<div id="tab-boss" class="tab-content"><div class="tab-layout"><div class="save-column"><button class="save-btn" data-i18n="saveHeroes" onclick="openSaveModal('boss')"></button><button class="load-btn hidden" id="load-btn-boss" data-i18n="loadHeroes" onclick="openLoadModal('boss')"></button></div><div class="team-wrapper"><div class="tabs"><button class="tab-btn" data-i18n="tabCalc" onclick="switchTab('calc')"></button><button class="tab-btn active" data-i18n="tabBoss" onclick="switchTab('boss')"></button><button class="tab-btn" data-i18n="tabAvg" onclick="switchTab('avg')"></button></div><div class="team"><div class="column"><h2 data-i18n="yourHeroes"></h2><div class="controls"><button class="add-btn" id="add-ally-btn-boss" data-i18n="add"></button><button class="remove-btn" id="rem-ally-btn-boss" data-i18n="remove"></button></div><div id="allies-container-boss" class="unit-container"></div></div><div class="column"><h2 data-i18n="enemies"></h2><div class="controls"><button class="add-btn" id="add-enemy-btn-boss" data-i18n="add"></button><button class="remove-btn" id="rem-enemy-btn-boss" data-i18n="remove"></button></div><div id="enemies-container-boss" class="unit-container"></div></div></div><button class="calc-btn" data-i18n="calcAttempts" onclick="calculateBossAttempts()"></button><div id="result-boss" class="result"></div></div></div></div>
+<div id="tab-avg" class="tab-content"><div class="tab-layout"><div class="team-wrapper"><div class="tabs"><button class="tab-btn" data-i18n="tabCalc" onclick="switchTab('calc')"></button><button class="tab-btn" data-i18n="tabBoss" onclick="switchTab('boss')"></button><button class="tab-btn active" data-i18n="tabAvg" onclick="switchTab('avg')"></button></div><div class="avg-damage-container"><h2 data-i18n="avgDmgTitle"></h2><div class="avg-damage-inputs"><div class="avg-damage-input-row"><label>⚔️ <span data-i18n="atk"></span>:</label><input type="number" id="avg-atk" value="20" min="1"></div><div class="avg-damage-input-row"><label>🛡️ <span data-i18n="def"></span>:</label><input type="number" id="avg-def" value="10" min="1"></div></div><button class="calc-btn" data-i18n="calcAvgDmg" onclick="calculateAvgDamage()"></button><div id="result-avg" class="result"></div></div></div></div></div>
+<div id="save-modal" class="modal-overlay" onclick="if(event.target===this)closeSaveModal()"><div class="modal-content"><button class="modal-close" onclick="closeSaveModal()">&times;</button><div class="modal-title" data-i18n="saveHeroes"></div><div id="save-slots"></div></div></div>
+<div id="load-modal" class="modal-overlay" onclick="if(event.target===this)closeLoadModal()"><div class="modal-content"><button class="modal-close" onclick="closeLoadModal()">&times;</button><div class="modal-title" data-i18n="loadHeroes"></div><div id="load-slots"></div></div></div>
 <script>
-    let currentLang = 'ru';
-    const t = {
-        ru: {
-            tabCalc: "Калькулятор шанса", tabBoss: "Боссы", tabAvg: "Средний урон",
-            yourHeroes: "Ваши герои", enemies: "Враги", add: "+ Добавить", remove: "- Убрать",
-            saveHeroes: "Сохранить героев", loadHeroes: "Загрузить героев",
-            ally: "Герой", enemy: "Враг", atk: "Атака", def: "Броня",
-            swapHero: "Поменять героя", selectSwap: "Выбрать замену",
-            simulate: "ПРОВЕСТИ БОИ", calcAttempts: "Узнать среднее количество попыток", calcAvgDmg: "Посчитать средний урон",
-            avgDmgTitle: "Средний урон за удар",
-            winChance: "🏆 Шанс победы:", draw: "⚖️ Ничья:", avgDead: "💀 Среднее погибших героев:", avgHp: "❤️ Среднее оставшееся HP:",
-            avgAttempts: "Среднее количество попыток:", avgDmgResult: "Средний урон за удар:",
-            calc: "Считаем...",
-            helpCalc: "Этот калькулятор показывает шансы на победу, основываясь на данных 10 000 проведенных боев.",
-            helpBoss: "На текущей вкладке вы можете узнать какое в среднем количество боев вам нужно провести против сильных противников, прежде чем их победить.",
-            helpAvg: "Эта вкладка показывает средний урон за один удар на основе 100 000 симуляций.",
-            enterName: "Введите название сохранения:", overwrite: "Перезаписать сохранение", delete: "Удалить это сохранение?", empty: "Нет сохранений", slot: "Слот"
-        },
-        en: {
-            tabCalc: "Win Chance", tabBoss: "Bosses", tabAvg: "Avg Damage",
-            yourHeroes: "Your Heroes", enemies: "Enemies", add: "+ Add", remove: "- Remove",
-            saveHeroes: "Save Heroes", loadHeroes: "Load Heroes",
-            ally: "Hero", enemy: "Enemy", atk: "Attack", def: "Armor",
-            swapHero: "Swap Hero", selectSwap: "Select Swap",
-            simulate: "SIMULATE BATTLES", calcAttempts: "Calculate Avg Attempts", calcAvgDmg: "Calculate Avg Damage",
-            avgDmgTitle: "Average Damage per Hit",
-            winChance: "🏆 Win Chance:", draw: "⚖️ Draw:", avgDead: "💀 Avg Heroes Dead:", avgHp: "❤️ Avg Remaining HP:",
-            avgAttempts: "Average Attempts:", avgDmgResult: "Average Damage per Hit:",
-            calc: "Calculating...",
-            helpCalc: "This calculator shows win chances based on 10,000 simulated battles.",
-            helpBoss: "On this tab, you can find out the average number of battles needed to defeat strong enemies.",
-            helpAvg: "This tab shows the average damage per hit based on 100,000 simulations.",
-            enterName: "Enter save name:", overwrite: "Overwrite save", delete: "Delete this save?", empty: "No saves", slot: "Slot"
-        }
-    };
+let currentLang='ru';
+const t={
+ru:{tabCalc:"Калькулятор шанса",tabBoss:"Боссы",tabAvg:"Средний урон",yourHeroes:"Ваши герои",enemies:"Враги",add:"+ Добавить",remove:"- Убрать",saveHeroes:"Сохранить героев",loadHeroes:"Загрузить героев",ally:"Герой",enemy:"Враг",atk:"Атака",def:"Броня",swapHero:"Поменять героя",selectSwap:"Выбрать замену",simulate:"ПРОВЕСТИ БОИ",calcAttempts:"Узнать среднее количество попыток",calcAvgDmg:"Посчитать средний урон",avgDmgTitle:"Средний урон за удар",winChance:"🏆 Шанс победы:",draw:"⚖️ Ничья:",avgDead:"💀 Среднее погибших героев:",avgHp:"❤️ Среднее оставшееся HP:",avgAttempts:"Среднее количество попыток:",avgDmgResult:"Средний урон за удар:",calc:"Считаем...",helpCalc:"Этот калькулятор показывает шансы на победу, основываясь на данных 10 000 проведенных боев.",helpBoss:"На текущей вкладке вы можете узнать какое в среднем количество боев вам нужно провести против сильных противников, прежде чем их победить.",helpAvg:"Эта вкладка показывает средний урон за один удар на основе 100 000 симуляций.",enterName:"Введите название сохранения:",overwrite:"Перезаписать сохранение",delete:"Удалить это сохранение?",empty:"Нет сохранений",slot:"Слот",save:"Сохранить",load:"Загрузить",del:"Удалить"},
+en:{tabCalc:"Win Chance",tabBoss:"Bosses",tabAvg:"Avg Damage",yourHeroes:"Your Heroes",enemies:"Enemies",add:"+ Add",remove:"- Remove",saveHeroes:"Save Heroes",loadHeroes:"Load Heroes",ally:"Hero",enemy:"Enemy",atk:"Attack",def:"Armor",swapHero:"Swap Hero",selectSwap:"Select Swap",simulate:"SIMULATE BATTLES",calcAttempts:"Calculate Avg Attempts",calcAvgDmg:"Calculate Avg Damage",avgDmgTitle:"Average Damage per Hit",winChance:"🏆 Win Chance:",draw:"⚖️ Draw:",avgDead:"💀 Avg Heroes Dead:",avgHp:"❤️ Avg Remaining HP:",avgAttempts:"Average Attempts:",avgDmgResult:"Average Damage per Hit:",calc:"Calculating...",helpCalc:"This calculator shows win chances based on 10,000 simulated battles.",helpBoss:"On this tab you can find out the average number of battles needed to defeat strong enemies.",helpAvg:"This tab shows the average damage per hit based on 100,000 simulations.",enterName:"Enter save name:",overwrite:"Overwrite save",delete:"Delete this save?",empty:"No saves",slot:"Slot",save:"Save",load:"Load",del:"Delete"}
+};
+let MAX_UNITS=10,allyCount=0,enemyCount=0,allyCountBoss=0,enemyCountBoss=0;
+let currentTab='calc',currentSaveType='';
+let SAVE_KEY='champions_avan_saves';
+let swapState={active:false,tab:null,firstIndex:-1};
+const shieldIcon='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;margin-right:4px"><path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="#C0C0C0" stroke="#7F8C8D" stroke-width="1.5"/><path d="M12 20.5C12 20.5 18.5 17 18.5 12V6L12 3.5L5.5 6V12C5.5 17 12 20.5 12 20.5Z" fill="none" stroke="#95A5A6" stroke-width="0.5"/></svg>';
+const recycleIcon='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:middle"><path d="M12 4A8 8 0 0 1 20 12" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M20 12L17 9M20 12L17 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20A8 8 0 0 1 4 12" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M4 12L7 9M4 12L7 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-    let MAX_UNITS = 10, allyCount = 0, enemyCount = 0, allyCountBoss = 0, enemyCountBoss = 0;
-    let currentTab = 'calc', currentSaveType = '';
-    let SAVE_KEY = 'champions_avan_saves';
-    let swapState = { active: false, tab: null, firstIndex: -1 };
+function toggleLang(){currentLang=currentLang==='ru'?'en':'ru';document.getElementById('lang-btn').innerText=currentLang==='ru'?'EN':'RU';applyTranslations();if(swapState.active)cancelSwap();}
+function applyTranslations(){document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(t[currentLang][k])el.innerText=t[currentLang][k];});document.getElementById('help-text').innerText=t[currentLang]['help'+currentTab.charAt(0).toUpperCase()+currentTab.slice(1)]||t[currentLang].helpCalc;}
+document.getElementById('help-btn').addEventListener('click',function(){let b=document.getElementById('help-box');if(b.style.display==='block'){b.style.display='none';this.innerText='?';}else{b.style.display='block';this.innerText='×';}});
+function switchTab(tab){currentTab=tab;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('tab-'+tab).classList.add('active');document.querySelectorAll('.tab-btn').forEach(b=>{if(b.getAttribute('onclick').includes("'"+tab+"'"))b.classList.add('active');});applyTranslations();}
 
-    const shieldIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;margin-right:4px;"><path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="#C0C0C0" stroke="#7F8C8D" stroke-width="1.5"/><path d="M12 20.5C12 20.5 18.5 17 18.5 12V6L12 3.5L5.5 6V12C5.5 17 12 20.5 12 20.5Z" fill="none" stroke="#95A5A6" stroke-width="0.5"/></svg>';
-    const swordIcon = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;margin-right:4px;"><path d="M14.5 3L3 14.5V17H6L17.5 5.5L14.5 3Z" fill="#C0C0C0" stroke="#7F8C8D" stroke-width="1"/><path d="M12 7L17 12" stroke="#7F8C8D" stroke-width="2" stroke-linecap="round"/><path d="M10 14L14 10" stroke="#95A5A6" stroke-width="1.5" stroke-linecap="round"/></svg>';
-    const recycleIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;"><path d="M12 4 A8 8 0 0 1 20 12" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M20 12 L17 9 M20 12 L17 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20 A8 8 0 0 1 4 12" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M4 12 L7 9 M4 12 L7 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function addUnit(type,isBoss){
+let count=isBoss?(type==='ally'?allyCountBoss:enemyCountBoss):(type==='ally'?allyCount:enemyCount);
+if(count>=MAX_UNITS)return;
+let container=document.getElementById((type==='ally'?'allies':'enemies')+'-container'+(isBoss?'-boss':''));
+let div=document.createElement('div');
+div.className='char-input'+(type==='enemy'?' enemy-card':'');
+let nameText=type==='ally'?t[currentLang].ally:t[currentLang].enemy;
+let suffix=isBoss?'-boss':'';
+div.innerHTML='<div class="unit-header"><input type="text" class="name-input" value="'+(count===0?nameText:nameText+' '+(count+1))+'"></div><div class="stats-row top"><div class="stat-item"><label>⚔️ <span data-i18n="atk">'+t[currentLang].atk+'</span>:</label><input type="number" id="'+type+'_atk_'+count+suffix+'" value="20" min="1"></div><div class="stat-item"><label>'+shieldIcon+'<span data-i18n="def">'+t[currentLang].def+'</span>:</label><input type="number" id="'+type+'_def_'+count+suffix+'" value="10" min="1"></div></div><div class="stats-row bottom"><div class="stat-item"><label>❤️ HP:</label><input type="number" id="'+type+'_hp_'+count+suffix+'" value="100" min="1"></div></div>';
+container.appendChild(div);
+if(isBoss){if(type==='ally')allyCountBoss++;else enemyCountBoss++;}else{if(type==='ally')allyCount++;else enemyCount++;}
+updateButtons(isBoss);
+if(type==='ally')updateSwapButtons(isBoss);
+}
 
-    function toggleLang() {
-        currentLang = currentLang === 'ru' ? 'en' : 'ru';
-        document.getElementById('lang-btn').innerText = currentLang === 'ru' ? 'EN' : 'RU';
-        applyTranslations();
-        if(swapState.active) cancelSwap(); 
-    }
+function removeUnit(type,isBoss){
+let count=isBoss?(type==='ally'?allyCountBoss:enemyCountBoss):(type==='ally'?allyCount:enemyCount);
+if(count<=1)return;
+let container=document.getElementById((type==='ally'?'allies':'enemies')+'-container'+(isBoss?'-boss':''));
+if(container.lastElementChild)container.lastElementChild.remove();
+if(isBoss){if(type==='ally')allyCountBoss--;else enemyCountBoss--;}else{if(type==='ally')allyCount--;else enemyCount--;}
+updateButtons(isBoss);
+if(type==='ally')updateSwapButtons(isBoss);
+}
 
-    function applyTranslations() {
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (t[currentLang][key]) el.innerText = t[currentLang][key];
-        });
-        const helpTexts = { 'calc': t[currentLang].helpCalc, 'boss': t[currentLang].helpBoss, 'avg': t[currentLang].helpAvg };
-        document.getElementById('help-text').innerText = helpTexts[currentTab] || helpTexts['calc'];
-    }
+function updateButtons(isBoss){
+let s=isBoss?'-boss':'';
+let a=isBoss?allyCountBoss:allyCount,e=isBoss?enemyCountBoss:enemyCount;
+document.getElementById('add-ally-btn'+s).disabled=(a>=MAX_UNITS);
+document.getElementById('rem-ally-btn'+s).disabled=(a<=1);
+document.getElementById('add-enemy-btn'+s).disabled=(e>=MAX_UNITS);
+document.getElementById('rem-enemy-btn'+s).disabled=(e<=1);
+}
 
-    document.getElementById('help-btn').addEventListener('click', function() {
-        let box = document.getElementById('help-box');
-        if (box.style.display === 'block') { box.style.display = 'none'; this.innerText = '?'; }
-        else { box.style.display = 'block'; this.innerText = '×'; }
-    });
+function updateSwapButtons(isBoss){
+let container=document.getElementById(isBoss?'allies-container-boss':'allies-container');
+let cards=Array.from(container.children);
+let count=isBoss?allyCountBoss:allyCount;
+for(let i=0;i<cards.length;i++){
+let header=cards[i].querySelector('.unit-header');
+let existing=header.querySelector('.swap-btn,.swap-icon');
+if(count<=1){if(existing)existing.remove();}
+else{if(!existing){let btn=document.createElement('button');btn.className='swap-btn main';btn.innerText=t[currentLang].swapHero;btn.onclick=(function(idx){return function(){startSwap(idx,isBoss);};})(i);header.appendChild(btn);}}
+}
+}
 
-    function switchTab(tab) {
-        currentTab = tab;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById('tab-' + tab).classList.add('active');
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            if ((tab === 'calc' && btn.getAttribute('onclick').includes("'calc'")) ||
-                (tab === 'boss' && btn.getAttribute('onclick').includes("'boss'")) ||
-                (tab === 'avg' && btn.getAttribute('onclick').includes("'avg'"))) {
-                btn.classList.add('active');
-            }
-        });
-        applyTranslations();
-    }
+document.getElementById('add-ally-btn').onclick=()=>addUnit('ally',false);
+document.getElementById('rem-ally-btn').onclick=()=>removeUnit('ally',false);
+document.getElementById('add-enemy-btn').onclick=()=>addUnit('enemy',false);
+document.getElementById('rem-enemy-btn').onclick=()=>removeUnit('enemy',false);
+document.getElementById('add-ally-btn-boss').onclick=()=>addUnit('ally',true);
+document.getElementById('rem-ally-btn-boss').onclick=()=>removeUnit('ally',true);
+document.getElementById('add-enemy-btn-boss').onclick=()=>addUnit('enemy',true);
+document.getElementById('rem-enemy-btn-boss').onclick=()=>removeUnit('enemy',true);
 
-    function addUnit(type, isBoss) {
-        let count = isBoss ? (type==='ally'?allyCountBoss:enemyCountBoss) : (type==='ally'?allyCount:enemyCount);
-        if (count >= MAX_UNITS) return;
-        let container = document.getElementById((type==='ally'?'allies':'enemies') + '-container' + (isBoss?'-boss':''));
-        let div = document.createElement('div');
-        div.className = 'char-input' + (type==='enemy'?' enemy-card':'');
-        let nameText = (type==='ally' ? t[currentLang].ally : t[currentLang].enemy);
-        let suffix = isBoss ? '-boss' : '';
-        let swapBtnHtml = type === 'ally' ? `<button class="swap-btn main" onclick="startSwap(${count}, ${isBoss})">${t[currentLang].swapHero}</button>` : '';
-        
-        div.innerHTML = `<div class="unit-header"><input type="text" class="name-input" value="${count===0?nameText:nameText+' '+(count+1)}">${swapBtnHtml}</div>` +
-            `<div class="stats-row top"><div class="stat-item"><label>${swordIcon}<span data-i18n="atk">${t[currentLang].atk}</span>:</label><input type="number" id="${type}_atk_${count}${suffix}" value="20" min="1"></div>` +
-            `<div class="stat-item"><label>${shieldIcon}<span data-i18n="def">${t[currentLang].def}</span>:</label><input type="number" id="${type}_def_${count}${suffix}" value="10" min="1"></div></div>` +
-            `<div class="stats-row bottom"><div class="stat-item"><label>❤️ HP:</label><input type="number" id="${type}_hp_${count}${suffix}" value="100" min="1"></div></div>`;
-        container.appendChild(div);
-        if (isBoss) { if(type==='ally') allyCountBoss++; else enemyCountBoss++; }
-        else { if(type==='ally') allyCount++; else enemyCount++; }
-        updateButtons(isBoss);
-    }
+function getTeamData(type,isBoss){
+let team=[],count=isBoss?(type==='ally'?allyCountBoss:enemyCountBoss):(type==='ally'?allyCount:enemyCount);
+let s=isBoss?'-boss':'';
+let container=document.getElementById((type==='ally'?'allies':'enemies')+'-container'+(isBoss?'-boss':''));
+let cards=Array.from(container.children);
+for(let i=0;i<count;i++){let c=cards[i];let n=c.querySelector('.name-input');team.push({name:n?n.value:'',hp:parseInt(document.getElementById(type+'_hp_'+i+s).value)||1,atk:parseInt(document.getElementById(type+'_atk_'+i+s).value)||1,def:parseInt(document.getElementById(type+'_def_'+i+s).value)||1,position:i});}
+return team;
+}
+function setTeamData(type,isBoss,data){
+let s=isBoss?'-boss':'';let cc=isBoss?(type==='ally'?allyCountBoss:enemyCountBoss):(type==='ally'?allyCount:enemyCount);
+while(cc>data.length){removeUnit(type,isBoss);cc--;}
+while(cc<data.length){addUnit(type,isBoss);cc++;}
+let container=document.getElementById((type==='ally'?'allies':'enemies')+'-container'+(isBoss?'-boss':''));
+let cards=Array.from(container.children);
+for(let i=0;i<data.length;i++){let c=cards[i];let n=c.querySelector('.name-input');if(n&&data[i].name)n.value=data[i].name;document.getElementById(type+'_hp_'+i+s).value=data[i].hp;document.getElementById(type+'_atk_'+i+s).value=data[i].atk;document.getElementById(type+'_def_'+i+s).value=data[i].def;}
+if(type==='ally')updateSwapButtons(isBoss);
+}
+function getAllyContainer(isBoss){return document.getElementById(isBoss?'allies-container-boss':'allies-container');}
 
-    function removeUnit(type, isBoss) {
-        let count = isBoss ? (type==='ally'?allyCountBoss:enemyCountBoss) : (type==='ally'?allyCount:enemyCount);
-        if (count <= 1) return;
-        let container = document.getElementById((type==='ally'?'allies':'enemies') + '-container' + (isBoss?'-boss':''));
-        if (container.lastElementChild) container.lastElementChild.remove();
-        if (isBoss) { if(type==='ally') allyCountBoss--; else enemyCountBoss--; }
-        else { if(type==='ally') allyCount--; else enemyCount--; }
-        updateButtons(isBoss);
-    }
+function startSwap(index,isBoss){
+if(swapState.active&&swapState.firstIndex===index&&swapState.tab===(isBoss?'boss':'calc')){cancelSwap();return;}
+if(swapState.active)cancelSwap();
+swapState.active=true;swapState.tab=isBoss?'boss':'calc';swapState.firstIndex=index;
+let container=getAllyContainer(isBoss);let cards=Array.from(container.children);
+for(let i=0;i<cards.length;i++){let header=cards[i].querySelector('.unit-header');let btn=header.querySelector('.swap-btn,.swap-icon');
+if(i===index){let icon=document.createElement('div');icon.className='swap-icon';icon.innerHTML=recycleIcon;if(btn)btn.replaceWith(icon);}
+else{let nb=document.createElement('button');nb.className='swap-btn target';nb.innerText=t[currentLang].selectSwap;nb.setAttribute('data-index',i);nb.onclick=function(){completeSwap(parseInt(this.getAttribute('data-index')),isBoss);};if(btn)btn.replaceWith(nb);}}
+}
+function completeSwap(secondIndex,isBoss){
+let fi=swapState.firstIndex;if(fi===secondIndex){cancelSwap();return;}
+let s=isBoss?'-boss':'';
+['hp','atk','def'].forEach(f=>{let e1=document.getElementById('ally_'+f+'_'+fi+s);let e2=document.getElementById('ally_'+f+'_'+secondIndex+s);let tmp=e1.value;e1.value=e2.value;e2.value=tmp;});
+let container=getAllyContainer(isBoss);let cards=Array.from(container.children);
+let n1=cards[fi].querySelector('.name-input').value;let n2=cards[secondIndex].querySelector('.name-input').value;
+cards[fi].querySelector('.name-input').value=n2;cards[secondIndex].querySelector('.name-input').value=n1;
+cancelSwap();
+}
+function cancelSwap(){
+if(!swapState.active)return;let isBoss=swapState.tab==='boss';
+swapState.active=false;swapState.tab=null;swapState.firstIndex=-1;
+updateSwapButtons(isBoss);
+}
 
-    function updateButtons(isBoss) {
-        let s = isBoss?'-boss':'';
-        let a = isBoss?allyCountBoss:allyCount, e = isBoss?enemyCountBoss:enemyCount;
-        document.getElementById('add-ally-btn'+s).disabled = (a>=MAX_UNITS);
-        document.getElementById('rem-ally-btn'+s).disabled = (a<=1);
-        document.getElementById('add-enemy-btn'+s).disabled = (e>=MAX_UNITS);
-        document.getElementById('rem-enemy-btn'+s).disabled = (e<=1);
-    }
+function roll(max){return Math.floor(Math.random()*max)+1;}
+function findTarget(attacker,enemies){
+let alive=enemies.filter(e=>e.currentHp>0);if(!alive.length)return null;
+let opp=alive.find(e=>e.position===attacker.position);if(opp)return opp;
+let best=null,minDist=Infinity;
+for(let e of alive){let d=Math.abs(e.position-attacker.position);if(d<minDist){minDist=d;best=e;}else if(d===minDist&&e.position<best.position){best=e;}}
+return best;
+}
+function simulateFight(allyTeam,enemyTeam){
+let allies=allyTeam.map(c=>({...c,currentHp:c.hp}));let enemies=enemyTeam.map(c=>({...c,currentHp:c.hp}));let turns=0;
+while(true){if(turns++>5000)return{result:'draw',allies};let aA=allies.filter(a=>a.currentHp>0);let eA=enemies.filter(e=>e.currentHp>0);if(!aA.length||!eA.length)break;
+for(let a of aA){let tgt=findTarget(a,enemies);if(tgt)tgt.currentHp-=Math.max(0,roll(a.atk)-roll(tgt.def));}
+eA=enemies.filter(e=>e.currentHp>0);if(!eA.length)break;
+for(let e of eA){let tgt=findTarget(e,allies);if(tgt)tgt.currentHp-=Math.max(0,roll(e.atk)-roll(tgt.def));}}
+return{result:allies.some(a=>a.currentHp>0)?'win':'lose',allies};
+}
+function calculateWinChance(){
+let allies=getTeamData('ally',false),enemies=getTeamData('enemy',false);
+document.getElementById('result').innerText=t[currentLang].calc;
+setTimeout(()=>{let w=0,d=0,td=0,tr=0;for(let i=0;i<10000;i++){let r=simulateFight(allies,enemies);if(r.result==='win'){w++;td+=r.allies.filter(a=>a.currentHp<=0).length;tr+=r.allies.reduce((s,a)=>s+Math.max(0,a.currentHp),0);}else if(r.result==='draw')d++;}
+let h=t[currentLang].winChance+' <span style="color:#2ecc71">'+(w/100).toFixed(2)+'%</span>';if(d>0)h+='<br>'+t[currentLang].draw+' '+(d/100).toFixed(2)+'%';if(w>0)h+='<br>'+t[currentLang].avgDead+' <span style="color:#e74c3c">'+(td/w).toFixed(2)+'</span><br>'+t[currentLang].avgHp+' <span style="color:#2ecc71">'+(tr/w).toFixed(2)+'</span>';
+document.getElementById('result').innerHTML=h;},50);
+}
+function simulateBossFight(allyTeam,enemyTeam){
+let allies=allyTeam.map(c=>({...c,currentHp:c.hp}));let enemies=enemyTeam.map(c=>({...c,currentHp:c.hp}));let attempts=0;
+while(true){attempts++;if(attempts>1000)return attempts;let turns=0;
+while(true){if(turns++>5000)break;let aA=allies.filter(a=>a.currentHp>0);let eA=enemies.filter(e=>e.currentHp>0);if(!aA.length||!eA.length)break;
+for(let a of aA){let tgt=findTarget(a,enemies);if(tgt)tgt.currentHp-=Math.max(0,roll(a.atk)-roll(tgt.def));}
+eA=enemies.filter(e=>e.currentHp>0);if(!eA.length)return attempts;
+for(let e of eA){let tgt=findTarget(e,allies);if(tgt)tgt.currentHp-=Math.max(0,roll(e.atk)-roll(tgt.def));}}
+for(let i=0;i<allies.length;i++)allies[i].currentHp=allies[i].hp;}
+}
+function calculateBossAttempts(){
+let allies=getTeamData('ally',true),enemies=getTeamData('enemy',true);
+document.getElementById('result-boss').innerText=t[currentLang].calc;
+setTimeout(()=>{let total=0;for(let i=0;i<10000;i++)total+=simulateBossFight(allies,enemies);document.getElementById('result-boss').innerHTML=t[currentLang].avgAttempts+' <span style="color:#2ecc71">'+(total/10000).toFixed(2)+'</span>';},50);
+}
+function calculateAvgDamage(){
+let atk=parseInt(document.getElementById('avg-atk').value)||1;let def=parseInt(document.getElementById('avg-def').value)||1;
+document.getElementById('result-avg').innerText=t[currentLang].calc;
+setTimeout(()=>{let td=0;for(let i=0;i<100000;i++)td+=Math.max(0,roll(atk)-roll(def));document.getElementById('result-avg').innerHTML=t[currentLang].avgDmgResult+' <span style="color:#2ecc71">'+(td/100000).toFixed(2)+'</span>';},50);
+}
+function getSaves(){try{return JSON.parse(localStorage.getItem(SAVE_KEY))||{};}catch(e){return{};}}
+function saveSaves(d){localStorage.setItem(SAVE_KEY,JSON.stringify(d));}
+function openSaveModal(type){
+currentSaveType=type;let saves=getSaves();let html='';
+for(let i=1;i<=10;i++){let name=saves[i]?(saves[i].name||t[currentLang].slot+' '+i):t[currentLang].empty+' '+i;let has=!!saves[i];
+html+='<div class="save-slot"><div class="save-slot-name">'+name+'</div><div class="save-slot-actions"><button class="slot-btn save" onclick="doSave('+i+')">'+(has?t[currentLang].overwrite:t[currentLang].save)+'</button>'+(has?'<button class="slot-btn delete" onclick="doDelete('+i+')">'+t[currentLang].del+'</button>':'')+'</div></div>';}
+document.getElementById('save-slots').innerHTML=html;document.getElementById('save-modal').style.display='flex';
+}
+function closeSaveModal(){document.getElementById('save-modal').style.display='none';}
+function doSave(slot){
+let allies=getTeamData('ally',currentSaveType==='boss');let saves=getSaves();
+if(saves[slot]){if(!confirm(t[currentLang].overwrite+' "'+saves[slot].name+'"?'))return;saves[slot].allies=allies;}
+else{let name=prompt(t[currentLang].enterName,t[currentLang].slot+' '+slot);if(name===null)return;saves[slot]={name:name||(t[currentLang].slot+' '+slot),allies};}
+saveSaves(saves);closeSaveModal();updateLoadButtons();
+}
+function doDelete(slot){if(!confirm(t[currentLang].delete))return;let s=getSaves();delete s[slot];saveSaves(s);openSaveModal(currentSaveType);updateLoadButtons();}
+function openLoadModal(type){
+currentSaveType=type;let saves=getSaves();let html='',has=false;
+for(let i=1;i<=10;i++){if(saves[i]){has=true;html+='<div class="save-slot"><div class="save-slot-name">'+saves[i].name+'</div><div class="save-slot-actions"><button class="slot-btn load" onclick="doLoad('+i+')">'+t[currentLang].load+'</button><button class="slot-btn delete" onclick="doDeleteLoad('+i+')">'+t[currentLang].del+'</button></div></div>';}}
+if(!has)html='<div style="text-align:center;color:#95a5a6">'+t[currentLang].empty+'</div>';
+document.getElementById('load-slots').innerHTML=html;document.getElementById('load-modal').style.display='flex';
+}
+function closeLoadModal(){document.getElementById('load-modal').style.display='none';}
+function doLoad(slot){let s=getSaves();if(s[slot]){setTeamData('ally',currentSaveType==='boss',s[slot].allies);closeLoadModal();}}
+function doDeleteLoad(slot){if(!confirm(t[currentLang].delete))return;let s=getSaves();delete s[slot];saveSaves(s);openLoadModal(currentSaveType);updateLoadButtons();}
+function updateLoadButtons(){let h=Object.keys(getSaves()).length>0;document.getElementById('load-btn-calc').classList.toggle('hidden',!h);document.getElementById('load-btn-boss').classList.toggle('hidden',!h);}
 
-    document.getElementById('add-ally-btn').onclick = () => addUnit('ally', false);
-    document.getElementById('rem-ally-btn').onclick = () => removeUnit('ally', false);
-    document.getElementById('add-enemy-btn').onclick = () => addUnit('enemy', false);
-    document.getElementById('rem-enemy-btn').onclick = () => removeUnit('enemy', false);
-    document.getElementById('add-ally-btn-boss').onclick = () => addUnit('ally', true);
-    document.getElementById('rem-ally-btn-boss').onclick = () => removeUnit('ally', true);
-    document.getElementById('add-enemy-btn-boss').onclick = () => addUnit('enemy', true);
-    document.getElementById('rem-enemy-btn-boss').onclick = () => removeUnit('enemy', true);
-
-    function getTeamData(type, isBoss) {
-        let team = [], count = isBoss ? (type==='ally'?allyCountBoss:enemyCountBoss) : (type==='ally'?allyCount:enemyCount);
-        let s = isBoss ? '-boss' : '';
-        let container = document.getElementById((type==='ally'?'allies':'enemies') + '-container' + (isBoss?'-boss':''));
-        let cards = Array.from(container.children);
-        for (let i = 0; i < count; i++) {
-            let card = cards[i];
-            let nameInput = card.querySelector('.name-input');
-            team.push({ name: nameInput ? nameInput.value : '', hp: parseInt(document.getElementById(type+'_hp_'+i+s).value)||1, atk: parseInt(document.getElementById(type+'_atk_'+i+s).value)||1, def: parseInt(document.getElementById(type+'_def_'+i+s).value)||1, position: i });
-        }
-        return team;
-    }
-
-    function setTeamData(type, isBoss, data) {
-        let s = isBoss ? '-boss' : '';
-        let currentCount = isBoss ? (type==='ally'?allyCountBoss:enemyCountBoss) : (type==='ally'?allyCount:enemyCount);
-        while (currentCount > data.length) { removeUnit(type, isBoss); currentCount--; }
-        while (currentCount < data.length) { addUnit(type, isBoss); currentCount++; }
-        let container = document.getElementById((type==='ally'?'allies':'enemies') + '-container' + (isBoss?'-boss':''));
-        let cards = Array.from(container.children);
-        for (let i = 0; i < data.length; i++) {
-            let card = cards[i];
-            let nameInput = card.querySelector('.name-input');
-            if (nameInput && data[i].name) nameInput.value = data[i].name;
-            document.getElementById(type+'_hp_'+i+s).value = data[i].hp;
-            document.getElementById(type+'_atk_'+i+s).value = data[i].atk;
-            document.getElementById(type+'_def_'+i+s).value = data[i].def;
-        }
-    }
-
-    function getAllyContainer(isBoss) { return document.getElementById(isBoss ? 'allies-container-boss' : 'allies-container'); }
-
-    function startSwap(index, isBoss) {
-        if (swapState.active && swapState.firstIndex === index && swapState.tab === (isBoss?'boss':'calc')) { cancelSwap(); return; }
-        if (swapState.active) cancelSwap();
-        swapState.active = true; swapState.tab = isBoss ? 'boss' : 'calc'; swapState.firstIndex = index;
-        let container = getAllyContainer(isBoss);
-        let cards = Array.from(container.children);
-        for (let i = 0; i < cards.length; i++) {
-            let header = cards[i].querySelector('.unit-header');
-            let btn = header.querySelector('.swap-btn, .swap-icon');
-            if (i === index) {
-                let icon = document.createElement('div'); icon.className = 'swap-icon'; icon.innerHTML = recycleIcon;
-                if (btn) btn.replaceWith(icon);
-            } else {
-                let newBtn = document.createElement('button'); newBtn.className = 'swap-btn target'; newBtn.innerText = t[currentLang].selectSwap;
-                newBtn.setAttribute('data-index', i); newBtn.onclick = function() { completeSwap(parseInt(this.getAttribute('data-index')), isBoss); };
-                if (btn) btn.replaceWith(newBtn);
-            }
-        }
-    }
-    
-    function completeSwap(secondIndex, isBoss) {
-        let firstIndex = swapState.firstIndex;
-        if (firstIndex === secondIndex) { cancelSwap(); return; }
-        let s = isBoss ? '-boss' : '';
-        ['hp', 'atk', 'def'].forEach(f => {
-            let el1 = document.getElementById(`ally_${f}_${firstIndex}${s}`);
-            let el2 = document.getElementById(`ally_${f}_${secondIndex}${s}`);
-            let tmp = el1.value; el1.value = el2.value; el2.value = tmp;
-        });
-        let container = getAllyContainer(isBoss);
-        let cards = Array.from(container.children);
-        let name1 = cards[firstIndex].querySelector('.name-input').value;
-        let name2 = cards[secondIndex].querySelector('.name-input').value;
-        cards[firstIndex].querySelector('.name-input').value = name2;
-        cards[secondIndex].querySelector('.name-input').value = name1;
-        cancelSwap();
-    }
-    
-    function cancelSwap() {
-        if (!swapState.active) return;
-        let isBoss = swapState.tab === 'boss';
-        let container = getAllyContainer(isBoss);
-        let cards = Array.from(container.children);
-        for (let i = 0; i < cards.length; i++) {
-            let header = cards[i].querySelector('.unit-header');
-            let el = header.querySelector('.swap-btn, .swap-icon');
-            let newBtn = document.createElement('button'); newBtn.className = 'swap-btn main'; newBtn.innerText = t[currentLang].swapHero;
-            newBtn.setAttribute('onclick', `startSwap(${i}, ${isBoss})`);
-            if (el) el.replaceWith(newBtn);
-        }
-        swapState.active = false; swapState.tab = null; swapState.firstIndex = -1;
-    }
-
-    function roll(max) { return Math.floor(Math.random() * max) + 1; }
-    function findTarget(attacker, enemies) {
-        let alive = enemies.filter(e => e.currentHp > 0);
-        if (!alive.length) return null;
-        let opp = alive.find(e => e.position === attacker.position);
-        if (opp) return opp;
-        let best = null, minDist = Infinity;
-        for (let e of alive) {
-            let d = Math.abs(e.position - attacker.position);
-            if (d < minDist) { minDist = d; best = e; }
-            else if (d === minDist && e.position < best.position) { best = e; }
-        }
-        return best;
-    }
-
-    function simulateFight(allyTeam, enemyTeam) {
-        let allies = allyTeam.map(c => ({...c, currentHp: c.hp}));
-        let enemies = enemyTeam.map(c => ({...c, currentHp: c.hp}));
-        let turns = 0;
-        while (true) {
-            if (turns++ > 5000) return {result:'draw', allies: allies};
-            let aAlive = allies.filter(a => a.currentHp > 0);
-            let eAlive = enemies.filter(e => e.currentHp > 0);
-            if (!aAlive.length || !eAlive.length) break;
-            for (let a of aAlive) { let tgt = findTarget(a, enemies); if (tgt) tgt.currentHp -= Math.max(0, roll(a.atk) - roll(tgt.def)); }
-            eAlive = enemies.filter(e => e.currentHp > 0);
-            if (!eAlive.length) break;
-            for (let e of eAlive) { let tgt = findTarget(e, allies); if (tgt) tgt.currentHp -= Math.max(0, roll(e.atk) - roll(tgt.def)); }
-        }
-        return {result: allies.some(a => a.currentHp > 0) ? 'win' : 'lose', allies: allies};
-    }
-
-    function calculateWinChance() {
-        let allies = getTeamData('ally', false), enemies = getTeamData('enemy', false);
-        document.getElementById('result').innerText = t[currentLang].calc;
-        setTimeout(() => {
-            let wins = 0, draws = 0, totalDead = 0, totalRemainingHp = 0;
-            for (let i = 0; i < 10000; i++) {
-                let r = simulateFight(allies, enemies);
-                if (r.result === 'win') { wins++; totalDead += r.allies.filter(a => a.currentHp <= 0).length; totalRemainingHp += r.allies.reduce((sum, a) => sum + Math.max(0, a.currentHp), 0); }
-                else if (r.result === 'draw') draws++;
-            }
-            let html = `${t[currentLang].winChance} <span style="color:#2ecc71;">${(wins/100).toFixed(2)}%</span>`;
-            if (draws > 0) html += `<br>${t[currentLang].draw} ${(draws/100).toFixed(2)}%`;
-            if (wins > 0) html += `<br>${t[currentLang].avgDead} <span style="color:#e74c3c;">${(totalDead/wins).toFixed(2)}</span><br>${t[currentLang].avgHp} <span style="color:#2ecc71;">${(totalRemainingHp/wins).toFixed(2)}</span>`;
-            document.getElementById('result').innerHTML = html;
-        }, 50);
-    }
-
-    function simulateBossFight(allyTeam, enemyTeam) {
-        let allies = allyTeam.map(c => ({...c, currentHp: c.hp}));
-        let enemies = enemyTeam.map(c => ({...c, currentHp: c.hp}));
-        let attempts = 0;
-        while (true) {
-            attempts++; if (attempts > 1000) return attempts;
-            let turns = 0;
-            while (true) {
-                if (turns++ > 5000) break;
-                let aAlive = allies.filter(a => a.currentHp > 0);
-                let eAlive = enemies.filter(e => e.currentHp > 0);
-                if (!aAlive.length || !eAlive.length) break;
-                for (let a of aAlive) { let tgt = findTarget(a, enemies); if (tgt) tgt.currentHp -= Math.max(0, roll(a.atk) - roll(tgt.def)); }
-                eAlive = enemies.filter(e => e.currentHp > 0);
-                if (!eAlive.length) return attempts;
-                for (let e of eAlive) { let tgt = findTarget(e, allies); if (tgt) tgt.currentHp -= Math.max(0, roll(e.atk) - roll(tgt.def)); }
-            }
-            for (let i = 0; i < allies.length; i++) allies[i].currentHp = allies[i].hp;
-        }
-    }
-
-    function calculateBossAttempts() {
-        let allies = getTeamData('ally', true), enemies = getTeamData('enemy', true);
-        document.getElementById('result-boss').innerText = t[currentLang].calc;
-        setTimeout(() => {
-            let total = 0;
-            for (let i = 0; i < 10000; i++) total += simulateBossFight(allies, enemies);
-            document.getElementById('result-boss').innerHTML = `${t[currentLang].avgAttempts} <span style="color:#2ecc71;">${(total/10000).toFixed(2)}</span>`;
-        }, 50);
-    }
-
-    function calculateAvgDamage() {
-        let atk = parseInt(document.getElementById('avg-atk').value) || 1;
-        let def = parseInt(document.getElementById('avg-def').value) || 1;
-        document.getElementById('result-avg').innerText = t[currentLang].calc;
-        setTimeout(() => {
-            let totalDmg = 0;
-            for (let i = 0; i < 100000; i++) totalDmg += Math.max(0, roll(atk) - roll(def));
-            document.getElementById('result-avg').innerHTML = `${t[currentLang].avgDmgResult} <span style="color:#2ecc71;">${(totalDmg/100000).toFixed(2)}</span>`;
-        }, 50);
-    }
-
-    function getSaves() { try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch(e) { return {}; } }
-    function saveSaves(data) { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); }
-
-    function openSaveModal(type) {
-        currentSaveType = type;
-        let saves = getSaves();
-        let html = '';
-        for (let i = 1; i <= 10; i++) {
-            let name = saves[i] ? (saves[i].name || `${t[currentLang].slot} ${i}`) : `${t[currentLang].empty} ${i}`;
-            let hasData = !!saves[i];
-            html += `<div class="save-slot"><div class="save-slot-name">${name}</div><div class="save-slot-actions">` +
-                `<button class="slot-btn save" onclick="doSave(${i})">${hasData ? t[currentLang].overwrite : t[currentLang].saveHeroes.split(' ')[0]}</button>` +
-                (hasData ? `<button class="slot-btn delete" onclick="doDelete(${i})">${t[currentLang].delete.split(' ')[0]}</button>` : '') + `</div></div>`;
-        }
-        document.getElementById('save-slots').innerHTML = html;
-        document.getElementById('save-modal').style.display = 'flex';
-    }
-    function closeSaveModal() { document.getElementById('save-modal').style.display = 'none'; }
-
-    function doSave(slot) {
-        let allies = getTeamData('ally', currentSaveType === 'boss');
-        let saves = getSaves();
-        if (saves[slot]) {
-            let oldName = saves[slot].name || `${t[currentLang].slot} ${slot}`;
-            if (!confirm(`${t[currentLang].overwrite} "${oldName}"?`)) return;
-            saves[slot].allies = allies;
-        } else {
-            let name = prompt(`${t[currentLang].enterName}`, `${t[currentLang].slot} ${slot}`);
-            if (name === null) return;
-            saves[slot] = { name: name || `${t[currentLang].slot} ${slot}`, allies: allies };
-        }
-        saveSaves(saves); closeSaveModal(); updateLoadButtons();
-    }
-
-    function doDelete(slot) {
-        if (!confirm(t[currentLang].delete)) return;
-        let saves = getSaves(); delete saves[slot]; saveSaves(saves);
-        openSaveModal(currentSaveType); updateLoadButtons();
-    }
-
-    function openLoadModal(type) {
-        currentSaveType = type;
-        let saves = getSaves();
-        let html = '', hasAny = false;
-        for (let i = 1; i <= 10; i++) {
-            if (saves[i]) {
-                hasAny = true;
-                html += `<div class="save-slot"><div class="save-slot-name">${saves[i].name}</div><div class="save-slot-actions">` +
-                    `<button class="slot-btn load" onclick="doLoad(${i})">${t[currentLang].loadHeroes.split(' ')[0]}</button>` +
-                    `<button class="slot-btn delete" onclick="doDeleteLoad(${i})">${t[currentLang].delete.split(' ')[0]}</button></div></div>`;
-            }
-        }
-        if (!hasAny) html = `<div style="text-align:center;color:#95a5a6;">${t[currentLang].empty}</div>`;
-        document.getElementById('load-slots').innerHTML = html;
-        document.getElementById('load-modal').style.display = 'flex';
-    }
-    function closeLoadModal() { document.getElementById('load-modal').style.display = 'none'; }
-    function doLoad(slot) { let saves = getSaves(); if (saves[slot]) { setTeamData('ally', currentSaveType === 'boss', saves[slot].allies); closeLoadModal(); } }
-    function doDeleteLoad(slot) { if (!confirm(t[currentLang].delete)) return; let saves = getSaves(); delete saves[slot]; saveSaves(saves); openLoadModal(currentSaveType); updateLoadButtons(); }
-
-    function updateLoadButtons() {
-        let hasSaves = Object.keys(getSaves()).length > 0;
-        document.getElementById('load-btn-calc').classList.toggle('hidden', !hasSaves);
-        document.getElementById('load-btn-boss').classList.toggle('hidden', !hasSaves);
-    }
-
-    addUnit('ally', false); addUnit('enemy', false);
-    addUnit('ally', true); addUnit('enemy', true);
-    applyTranslations();
-    updateLoadButtons();
+addUnit('ally',false);addUnit('enemy',false);addUnit('ally',true);addUnit('enemy',true);
+applyTranslations();updateLoadButtons();
 </script>
 </body>
 </html>
