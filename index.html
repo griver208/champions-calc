@@ -11,72 +11,392 @@
         .fog-layer::before, .fog-layer::after { content: ""; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%); animation: fogDrift 30s infinite linear; }
         .fog-layer::after { background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 50%); animation: fogDrift 45s infinite reverse linear; }
         @keyframes fogDrift { 0% { transform: translate(0, 0); } 100% { transform: translate(10%, 5%); } }
-        header { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 20px; position: relative; gap: 10px; }
-        #lang-btn { width: 50px; height: 36px; border-radius: 5px; background: #2c3e50; color: #f1c40f; border: 1px solid #f1c40f; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            position: relative; 
+        }
+        .header-left { flex: 1; }
+        .header-right { display: flex; gap: 10px; align-items: center; }
+        
+        #lang-btn { 
+            width: 50px; 
+            height: 36px; 
+            border-radius: 5px; 
+            background: #2c3e50; 
+            color: #f1c40f; 
+            border: 1px solid #f1c40f; 
+            font-size: 14px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
         #lang-btn:hover { background: #34495e; }
-        #help-btn { width: 36px; height: 36px; border-radius: 50%; background: #3498db; color: white; border: none; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s; z-index: 1001; }
+        
+        #help-btn { 
+            width: 36px; 
+            height: 36px; 
+            border-radius: 50%; 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            font-size: 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            z-index: 1001; 
+        }
         #help-btn:hover { background: #2980b9; transform: scale(1.1); }
-        #help-box { display: none; position: absolute; top: 50px; right: 0; background: rgba(44, 62, 80, 0.95); padding: 15px 20px; border-radius: 8px; max-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); border: 1px solid #3498db; z-index: 1000; }
+        
+        #help-box { 
+            display: none; 
+            position: absolute; 
+            top: 50px; 
+            right: 0; 
+            background: rgba(44, 62, 80, 0.95); 
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            max-width: 350px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+            border: 1px solid #3498db; 
+            z-index: 1000; 
+        }
         #help-box p { font-size: 14px; line-height: 1.5; color: #ecf0f1; margin: 0; }
-        .tab-content { display: none; } .tab-content.active { display: block; }
-        .tab-layout { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 20px; }
-        .save-column { display: flex; flex-direction: column; gap: 10px; width: 180px; flex-shrink: 0; }
-        .save-btn, .load-btn { padding: 12px 10px; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; width: 100%; }
-        .save-btn { background: #9b59b6; } .save-btn:hover { background: #8e44ad; }
-        .load-btn { background: #16a085; } .load-btn:hover { background: #1abc9c; } .load-btn.hidden { display: none; }
-        .team-wrapper { flex: 1; min-width: 0; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { padding: 10px 20px; background: #34495e; color: #ecf0f1; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
-        .tab-btn:hover { background: #3d566e; } .tab-btn.active { background: #f39c12; color: #2c3e50; }
-        .team { display: flex; gap: 20px; align-items: stretch; }
-        .column { flex: 1; background: #2c3e50; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; }
-        h2 { text-align: center; border-bottom: 2px solid #e74c3c; padding-bottom: 10px; margin-top: 0; font-size: 18px; }
+        
+        .tab-content { display: none; } 
+        .tab-content.active { display: block; }
+        
+        .tab-layout { 
+            display: flex; 
+            gap: 15px; 
+            align-items: flex-start; 
+            margin-bottom: 20px; 
+            justify-content: center;
+        }
+        .save-column { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            width: 180px; 
+            flex-shrink: 0; 
+        }
+        .save-btn, .load-btn { 
+            padding: 12px 10px; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 13px; 
+            transition: 0.2s; 
+            width: 100%; 
+        }
+        .save-btn { background: #9b59b6; } 
+        .save-btn:hover { background: #8e44ad; }
+        .load-btn { background: #16a085; } 
+        .load-btn:hover { background: #1abc9c; } 
+        .load-btn.hidden { display: none; }
+        
+        .team-wrapper { 
+            flex: 1; 
+            min-width: 0; 
+            max-width: 700px;
+        }
+        
+        .tabs { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 15px; 
+            justify-content: center;
+        }
+        .tab-btn { 
+            padding: 10px 20px; 
+            background: #34495e; 
+            color: #ecf0f1; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 14px; 
+            transition: 0.2s; 
+        }
+        .tab-btn:hover { background: #3d566e; } 
+        .tab-btn.active { background: #f39c12; color: #2c3e50; }
+        
+        .team { 
+            display: flex; 
+            gap: 20px; 
+            align-items: stretch; 
+        }
+        .column { 
+            flex: 1; 
+            background: #2c3e50; 
+            padding: 15px; 
+            border-radius: 8px; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        h2 { 
+            text-align: center; 
+            border-bottom: 2px solid #e74c3c; 
+            padding-bottom: 10px; 
+            margin-top: 0; 
+            font-size: 18px; 
+        }
+        
         .controls { display: flex; gap: 10px; margin-bottom: 15px; }
-        .add-btn, .remove-btn { flex: 1; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
-        .add-btn { background: #27ae60; } .add-btn:hover:not(:disabled) { background: #2ecc71; }
-        .remove-btn { background: #c0392b; font-size: 14px; } .remove-btn:hover:not(:disabled) { background: #e74c3c; }
+        .add-btn, .remove-btn { 
+            flex: 1; 
+            padding: 10px; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 16px; 
+            transition: 0.2s; 
+        }
+        .add-btn { background: #27ae60; } 
+        .add-btn:hover:not(:disabled) { background: #2ecc71; }
+        .remove-btn { background: #c0392b; font-size: 14px; } 
+        .remove-btn:hover:not(:disabled) { background: #e74c3c; }
         .add-btn:disabled, .remove-btn:disabled { background: #7f8c8d; cursor: not-allowed; }
-        .unit-container { flex: 1; display: flex; flex-direction: column-reverse; gap: 10px; overflow-y: auto; max-height: 60vh; }
-        .char-input { padding: 10px; background: #34495e; border-radius: 5px; border-left: 4px solid #3498db; }
+        
+        .unit-container { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column-reverse; 
+            gap: 10px; 
+            overflow-y: auto; 
+            max-height: 60vh; 
+        }
+        .char-input { 
+            padding: 10px; 
+            background: #34495e; 
+            border-radius: 5px; 
+            border-left: 4px solid #3498db; 
+        }
         .char-input.enemy-card { border-left-color: #e74c3c; }
-        .unit-header { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-        .name-input { background: transparent; border: none; border-bottom: 1px dashed #7f8c8d; color: #f1c40f; font-size: 14px; font-weight: bold; flex: 1; padding: 2px 0; outline: none; }
+        
+        .unit-header { 
+            margin-bottom: 8px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .name-input { 
+            background: transparent; 
+            border: none; 
+            border-bottom: 1px dashed #7f8c8d; 
+            color: #f1c40f; 
+            font-size: 14px; 
+            font-weight: bold; 
+            flex: 1; 
+            padding: 2px 0; 
+            outline: none; 
+        }
         .name-input:focus { border-bottom-color: #f1c40f; }
-        .swap-btn { padding: 4px 10px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; white-space: nowrap; }
-        .swap-btn.main { background: #f39c12; color: white; } .swap-btn.main:hover { background: #f1c40f; }
-        .swap-btn.target { background: #27ae60; color: white; } .swap-btn.target:hover { background: #2ecc71; }
-        .swap-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: #f39c12; border-radius: 50%; cursor: default; }
-        .stats-row { display: flex; margin-bottom: 5px; } .stats-row.top { justify-content: center; gap: 10px; } .stats-row.bottom { justify-content: center; }
+        
+        .swap-btn { 
+            padding: 4px 10px; 
+            border: none; 
+            border-radius: 3px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 12px; 
+            transition: 0.2s; 
+            white-space: nowrap; 
+        }
+        .swap-btn.main { background: #f39c12; color: white; } 
+        .swap-btn.main:hover { background: #f1c40f; }
+        .swap-btn.target { background: #27ae60; color: white; } 
+        .swap-btn.target:hover { background: #2ecc71; }
+        
+        .swap-icon { 
+            width: 28px; 
+            height: 28px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: #f39c12; 
+            border-radius: 50%; 
+            cursor: default; 
+        }
+        
+        .stats-row { display: flex; margin-bottom: 5px; } 
+        .stats-row.top { justify-content: center; gap: 10px; } 
+        .stats-row.bottom { justify-content: center; }
         .stat-item { display: flex; align-items: center; gap: 5px; }
-        .stat-item label { font-size: 15px; font-weight: bold; color: #bdc3c7; margin: 0; white-space: nowrap; display: flex; align-items: center; }
-        input[type="number"] { width: 55px; padding: 4px; background: #ecf0f1; border: none; border-radius: 3px; text-align: center; color: #2c3e50; font-weight: bold; }
-        .calc-btn { width: 100%; padding: 15px; font-size: 20px; background: #f39c12; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; margin-top: 15px; margin-bottom: 15px; }
+        .stat-item label { 
+            font-size: 15px; 
+            font-weight: bold; 
+            color: #bdc3c7; 
+            margin: 0; 
+            white-space: nowrap; 
+            display: flex; 
+            align-items: center; 
+        }
+        input[type="number"] { 
+            width: 55px; 
+            padding: 4px; 
+            background: #ecf0f1; 
+            border: none; 
+            border-radius: 3px; 
+            text-align: center; 
+            color: #2c3e50; 
+            font-weight: bold; 
+        }
+        
+        .calc-btn { 
+            width: 100%; 
+            padding: 15px; 
+            font-size: 20px; 
+            background: #f39c12; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            margin-top: 15px; 
+            margin-bottom: 15px; 
+        }
         .calc-btn:hover { background: #f1c40f; color: #2c3e50; }
-        .result { font-size: 22px; text-align: center; font-weight: bold; color: #f1c40f; line-height: 1.5; min-height: 30px; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: #2c3e50; padding: 25px; border-radius: 10px; max-width: 500px; width: 90%; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); border: 1px solid #3498db; max-height: 80vh; overflow-y: auto; }
-        .modal-close { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; color: #95a5a6; cursor: pointer; background: none; border: none; }
+        
+        .result { 
+            font-size: 22px; 
+            text-align: center; 
+            font-weight: bold; 
+            color: #f1c40f; 
+            line-height: 1.5; 
+            min-height: 30px; 
+        }
+        
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 2000; 
+        }
+        .modal-content { 
+            background: #2c3e50; 
+            padding: 25px; 
+            border-radius: 10px; 
+            max-width: 500px; 
+            width: 90%; 
+            position: relative; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+            border: 1px solid #3498db; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+        }
+        .modal-close { 
+            position: absolute; 
+            top: 10px; 
+            right: 15px; 
+            font-size: 28px; 
+            font-weight: bold; 
+            color: #95a5a6; 
+            cursor: pointer; 
+            background: none; 
+            border: none; 
+        }
         .modal-close:hover { color: #e74c3c; }
-        .modal-title { font-size: 20px; font-weight: bold; color: #f1c40f; margin-bottom: 20px; text-align: center; }
-        .save-slot { background: #34495e; padding: 12px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-        .save-slot-name { font-size: 14px; color: #ecf0f1; flex: 1; word-break: break-all; margin-right: 10px; }
-        .slot-btn { padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s; margin-left: 5px; }
-        .slot-btn.save { background: #27ae60; color: white; } .slot-btn.save:hover { background: #2ecc71; }
-        .slot-btn.load { background: #3498db; color: white; } .slot-btn.load:hover { background: #2980b9; }
-        .slot-btn.delete { background: #c0392b; color: white; } .slot-btn.delete:hover { background: #e74c3c; }
-        .avg-damage-container { max-width: 400px; margin: 0 auto; background: #2c3e50; padding: 30px; border-radius: 8px; }
-        .avg-damage-inputs { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
-        .avg-damage-input-row { display: flex; align-items: center; gap: 10px; justify-content: center; }
-        .avg-damage-input-row label { font-size: 16px; font-weight: bold; color: #bdc3c7; min-width: 100px; }
-        .avg-damage-input-row input { width: 100px; padding: 8px; font-size: 16px; }
+        
+        .modal-title { 
+            font-size: 20px; 
+            font-weight: bold; 
+            color: #f1c40f; 
+            margin-bottom: 20px; 
+            text-align: center; 
+        }
+        
+        .save-slot { 
+            background: #34495e; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-radius: 5px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .save-slot-name { 
+            font-size: 14px; 
+            color: #ecf0f1; 
+            flex: 1; 
+            word-break: break-all; 
+            margin-right: 10px; 
+        }
+        .slot-btn { 
+            padding: 6px 12px; 
+            border: none; 
+            border-radius: 3px; 
+            cursor: pointer; 
+            font-size: 12px; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            margin-left: 5px; 
+        }
+        .slot-btn.save { background: #27ae60; color: white; } 
+        .slot-btn.save:hover { background: #2ecc71; }
+        .slot-btn.load { background: #3498db; color: white; } 
+        .slot-btn.load:hover { background: #2980b9; }
+        .slot-btn.delete { background: #c0392b; color: white; } 
+        .slot-btn.delete:hover { background: #e74c3c; }
+        
+        .avg-damage-container { 
+            max-width: 400px; 
+            margin: 0 auto; 
+            background: #2c3e50; 
+            padding: 30px; 
+            border-radius: 8px; 
+        }
+        .avg-damage-inputs { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        .avg-damage-input-row { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            justify-content: center; 
+        }
+        .avg-damage-input-row label { 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: #bdc3c7; 
+            min-width: 100px; 
+        }
+        .avg-damage-input-row input { 
+            width: 100px; 
+            padding: 8px; 
+            font-size: 16px; 
+        }
     </style>
 </head>
 <body>
     <div class="fog-layer"></div>
+    
     <header>
-        <button id="lang-btn" onclick="toggleLang()">EN</button>
-        <button id="help-btn" title="Help">?</button>
-        <div id="help-box"><p id="help-text"></p></div
+        <div class="header-left"></div>
+        <div class="header-right">
+            <button id="lang-btn" onclick="toggleLang()">EN</button>
+            <button id="help-btn" title="Help">?</button>
+            <div id="help-box">
+                <p id="help-text"></p>
+            </div>
+        </div>
     </header>
 
     <div id="tab-calc" class="tab-content active">
@@ -153,7 +473,6 @@
 
     <div id="tab-avg" class="tab-content">
         <div class="tab-layout">
-            <div class="save-column" style="visibility: hidden;"></div>
             <div class="team-wrapper">
                 <div class="tabs">
                     <button class="tab-btn" data-i18n="tabCalc" onclick="switchTab('calc')">Win Chance</button>
@@ -163,8 +482,14 @@
                 <div class="avg-damage-container">
                     <h2 data-i18n="avgDmgTitle">Average Damage per Hit</h2>
                     <div class="avg-damage-inputs">
-                        <div class="avg-damage-input-row"><label>⚔️ <span data-i18n="atk">Attack</span>:</label><input type="number" id="avg-atk" value="20" min="1"></div>
-                        <div class="avg-damage-input-row"><label>🛡️ <span data-i18n="def">Armor</span>:</label><input type="number" id="avg-def" value="10" min="1"></div>
+                        <div class="avg-damage-input-row">
+                            <label>⚔️ <span data-i18n="atk">Attack</span>:</label>
+                            <input type="number" id="avg-atk" value="20" min="1">
+                        </div>
+                        <div class="avg-damage-input-row">
+                            <label>🛡️ <span data-i18n="def">Armor</span>:</label>
+                            <input type="number" id="avg-def" value="10" min="1">
+                        </div>
                     </div>
                     <button class="calc-btn" data-i18n="calcAvgDmg" onclick="calculateAvgDamage()">Calculate Avg Damage</button>
                     <div id="result-avg" class="result"></div>
@@ -180,6 +505,7 @@
             <div id="save-slots"></div>
         </div>
     </div>
+    
     <div id="load-modal" class="modal-overlay" onclick="if(event.target===this) closeLoadModal()">
         <div class="modal-content">
             <button class="modal-close" onclick="closeLoadModal()">&times;</button>
@@ -195,7 +521,7 @@
             tabCalc: "Калькулятор шанса", tabBoss: "Боссы", tabAvg: "Средний урон",
             yourHeroes: "Ваши герои", enemies: "Враги", add: "+ Добавить", remove: "- Убрать",
             saveHeroes: "Сохранить героев", loadHeroes: "Загрузить героев",
-            ally: "Герой", enemy: "Enemy", atk: "Атака", def: "Броня",
+            ally: "Герой", enemy: "Враг", atk: "Атака", def: "Броня",
             swapHero: "Поменять героя", selectSwap: "Выбрать замену",
             simulate: "ПРОВЕСТИ БОИ", calcAttempts: "Узнать среднее количество попыток", calcAvgDmg: "Посчитать средний урон",
             avgDmgTitle: "Средний урон за удар",
@@ -238,7 +564,6 @@
         currentLang = currentLang === 'ru' ? 'en' : 'ru';
         document.getElementById('lang-btn').innerText = currentLang === 'ru' ? 'EN' : 'RU';
         applyTranslations();
-        // Обновляем кнопки перестановки, если режим активен
         if(swapState.active) cancelSwap(); 
     }
 
